@@ -35,6 +35,13 @@ func main() {
 		fmt.Println(err)
 	}
 
+	//Print Each Org Name in parallell
+	fmt.Println("Print Each Org Names in parallell:")
+	_, err = cf.EachOrg().Parallel(printOrgName)()
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	//Print Each Space Name
 	fmt.Println("Print Each Space Names:")
 	var printSpaceName functions.SpaceAction
