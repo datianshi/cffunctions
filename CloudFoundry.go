@@ -162,3 +162,36 @@ func (looper SpaceLooper) Filter(filter SpaceFilter) SpaceLooper {
 		return retSpaces, nil
 	}
 }
+
+func (looper SpaceLooper) Parallel(action SpaceAction) SpaceLooper {
+	return func() ([]Space, error) {
+		errorAggregator := make(chan error)
+		semaphone := make(chan bool, ConcurrencyCapacity)
+		spaces, err := looper()
+		if err != nil {
+			return nil, err
+		}
+		for _, space := range spaces {
+			semaphone <- true
+			go func(s Space) {
+				err = action(s)
+				<-semaphone
+				errorAggregator <- err
+			}(space)
+		}
+		var retErrorString string
+		for i := 0; i < cap(semaphone); i++ {
+			semaphone <- true
+		}
+		for i := 0; i < len(spaces); i++ {
+			r := <-errorAggregator
+			if r != nil {
+				retErrorString = fmt.Sprintf("%s\n%s", retErrorString, r)
+			}
+		}
+		if retErrorString != "" {
+			return spaces, errors.New(retErrorString)
+		}
+		return spaces, nil
+	}
+}
