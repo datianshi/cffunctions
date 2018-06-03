@@ -17,7 +17,10 @@ printOrgName = func(org functions.Org) error {
 cf.EachOrg().Action(printOrgName)()
 ```
 
-## Print each org name in parallell
+## Print each org name in parallel
+
+* Use GOROUTINE to serve the parallel processing
+* Aggregate all the errors if happens
 
 ```
 cf.EachOrg().Parallel(printOrgName)()
@@ -36,20 +39,24 @@ onlySystem = func(space functions.Space) bool {
 _, err = cf.EachSpace().Filter(onlySystem).Action(printSpaceName)()
 ```
 
-## Advance usage: Copy each org to another one
+## Advance usage: Copy each org to another one in parallel
 
 ```
 var createOrg functions.OrgAction = func(org functions.Org) error {
   _, err = client2.GetOrgByName(org.ORG.Name)
   if err != nil {
     _, err = client2.CreateOrg(cfclient.OrgRequest{Name: org.ORG.Name})
+    fmt.Println(err)
   } else {
-    fmt.Printf("Org already exists: %s", org.ORG.Name)
-    fmt.Println()
+    err = fmt.Errorf("Org already exists: %s", org.ORG.Name)
   }
   return err
 }
-cf.EachOrg().Action(createOrg)()
+
+_, err = cf.EachOrg().Parallel(createOrg)()
+if err != nil {
+  fmt.Println(err)
+}
 ```
 
 Refer [main.go](driver/main.go) for more examples

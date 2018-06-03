@@ -11,7 +11,7 @@ func main() {
 	config := &cfclient.Config{
 		ApiAddress:        "https://api.pas.nsx-t.shaozhenpcf.com",
 		Username:          "admin",
-		Password:          "XXXXX",
+		Password:          "hc9TO6_KThKb3WVhrX68B1uIusyLLvQM",
 		SkipSslValidation: true,
 	}
 	client, err := cfclient.NewClient(config)
@@ -35,8 +35,8 @@ func main() {
 		fmt.Println(err)
 	}
 
-	//Print Each Org Name in parallell
-	fmt.Println("Print Each Org Names in parallell:")
+	//Print Each Org Name in parallel
+	fmt.Println("Print Each Org Names in parallel:")
 	_, err = cf.EachOrg().Parallel(printOrgName)()
 	if err != nil {
 		fmt.Println(err)
@@ -68,12 +68,13 @@ func main() {
 		fmt.Println(err)
 	}
 
-	//Advanced Usage: Copy Orgs to another Foundation
+	//Advanced Usage: Copy Orgs to another Cloudfoundry Foundation
 
+	fmt.Println("copy to orgs to another foundation")
 	config2 := &cfclient.Config{
 		ApiAddress:        "https://api.pks.nsx.shaozhenpcf.com",
 		Username:          "admin",
-		Password:          "XXXXX",
+		Password:          "Vu056X1ePqy1q-v19rfTUS9YJLkdJeWd",
 		SkipSslValidation: true,
 	}
 	client2, err := cfclient.NewClient(config2)
@@ -86,14 +87,14 @@ func main() {
 		_, err = client2.GetOrgByName(org.ORG.Name)
 		if err != nil {
 			_, err = client2.CreateOrg(cfclient.OrgRequest{Name: org.ORG.Name})
+			fmt.Println(err)
 		} else {
-			fmt.Printf("Org already exists: %s", org.ORG.Name)
-			fmt.Println()
+			err = fmt.Errorf("Org already exists: %s", org.ORG.Name)
 		}
 		return err
 	}
 
-	_, err = cf.EachOrg().Action(createOrg)()
+	_, err = cf.EachOrg().Parallel(createOrg)()
 	if err != nil {
 		fmt.Println(err)
 	}

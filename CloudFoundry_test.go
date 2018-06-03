@@ -57,7 +57,7 @@ var _ = Describe("CloudFoundry", func() {
 				Ω(catchOrgs).Should(Equal(originOrgs))
 			})
 		})
-		Context("Parallell Execution with org2 and org3 failed", func() {
+		Context("Parallel Execution with org2 and org3 failed", func() {
 			BeforeEach(func() {
 				actionDriver = func(org Org) error {
 					if org.ORG.Name == "org3" {
