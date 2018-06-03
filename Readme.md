@@ -20,7 +20,7 @@ cf.EachOrg().Action(printOrgName)()
 ## Print each org name in parallel
 
 * Use GOROUTINE to serve the parallel processing
-* Aggregate all the errors if happens
+* Aggregate all the sub stream errors 
 
 ```
 cf.EachOrg().Parallel(printOrgName)()
