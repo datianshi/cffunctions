@@ -17,7 +17,7 @@ var _ = Describe("CloudFoundry", func() {
 	var err error
 	var catchOrgs []string
 	var originOrgs []string
-	var actionDriver OrgAction
+	var actionDriver Action
 	BeforeEach(func() {
 		api = &cffunctionsfakes.FakeAPI{}
 		cf = &CloudFoundry{Api: api}
@@ -38,14 +38,14 @@ var _ = Describe("CloudFoundry", func() {
 			}
 
 			catchOrgs = make([]string, 0)
-			actionDriver = func(org Org) error {
-				catchOrgs = append(catchOrgs, org.ORG.Name)
+			actionDriver = func(org CFObject) error {
+				catchOrgs = append(catchOrgs, org.GetName())
 				return nil
 			}
 		})
 		Context("Sequential Execution", func() {
 			BeforeEach(func() {
-				_, err = cf.EachOrg().Action(actionDriver)()
+				_, err = cf.Each(OrgFunc).Action(actionDriver)()
 			})
 			It("Should have no error", func() {
 				Ω(err).ShouldNot(HaveOccurred())
@@ -56,20 +56,39 @@ var _ = Describe("CloudFoundry", func() {
 			It("Should Equal to the originOrgs", func() {
 				Ω(catchOrgs).Should(Equal(originOrgs))
 			})
+
+			Context("Given a filter to print only org1", func() {
+				BeforeEach(func() {
+					catchOrgs = make([]string, 0)
+					var filter Filter = func(o CFObject) bool {
+						if o.GetName() == "org1" {
+							return true
+						}
+						return false
+					}
+					_, err = cf.Each(OrgFunc).Filter(filter).Action(actionDriver)()
+				})
+				It("Should have no error", func() {
+					Ω(err).ShouldNot(HaveOccurred())
+				})
+				It("Should Catch only 1 org", func() {
+					Ω(len(catchOrgs)).Should(Equal(1))
+				})
+			})
 		})
 		Context("Parallel Execution with org2 and org3 failed", func() {
 			BeforeEach(func() {
-				actionDriver = func(org Org) error {
-					if org.ORG.Name == "org3" {
+				actionDriver = func(object CFObject) error {
+					if object.GetName() == "org3" {
 						return errors.New("org3 failed!")
 					}
-					if org.ORG.Name == "org2" {
+					if object.GetName() == "org2" {
 						return errors.New("org2 failed!")
 					}
-					catchOrgs = append(catchOrgs, org.ORG.Name)
+					catchOrgs = append(catchOrgs, object.GetName())
 					return nil
 				}
-				_, err = cf.EachOrg().Parallel(actionDriver)()
+				_, err = cf.Each(OrgFunc).Parallel(actionDriver)()
 			})
 			It("Should have error", func() {
 				Ω(err).Should(HaveOccurred())
