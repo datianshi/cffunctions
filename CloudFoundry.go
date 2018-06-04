@@ -18,12 +18,6 @@ type CloudFoundry struct {
 type Looper func() ([]CFObject, error)
 type Action func(CFObject) error
 type Filter func(CFObject) bool
-type OrgAction func(Org) error
-type SpaceAction func(Space) error
-type OrgLooper func() ([]Org, error)
-type SpaceLooper func() ([]Space, error)
-type OrgFilter func(Org) bool
-type SpaceFilter func(Space) bool
 
 type ObjectFunc func(API) ([]CFObject, error)
 
@@ -96,5 +90,17 @@ func (looper Looper) Filter(filter Filter) Looper {
 			}
 		}
 		return retObjects, nil
+	}
+}
+
+func MultipleActions(actions ...Action) Action {
+	return func(object CFObject) error {
+		for _, action := range actions {
+			err := action(object)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
 	}
 }

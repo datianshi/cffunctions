@@ -70,11 +70,6 @@ type CFObject interface {
 	GetParent() (CFObject, error)
 }
 
-type Object struct {
-	Retriever   func(API) ([]interface{}, error)
-	Constructor func(API, interface{}) CFObject
-}
-
 var (
 	OrgFunc ObjectFunc = func(api API) ([]CFObject, error) {
 		objects, err := api.ListOrgs()

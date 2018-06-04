@@ -25,45 +25,40 @@ func main() {
 
 	//Print Each Org Name
 	fmt.Println("Print Each Org Names:")
-	var printOrgName functions.OrgAction
-	printOrgName = func(org functions.Org) error {
-		fmt.Println(org.ORG.Name)
+	var printName functions.Action
+	printName = func(o functions.CFObject) error {
+		fmt.Println(o.GetName())
 		return nil
 	}
-	_, err = cf.EachOrg().Action(printOrgName)()
+	_, err = cf.Each(functions.OrgFunc).Action(printName)()
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	//Print Each Org Name in parallel
 	fmt.Println("Print Each Org Names in parallel:")
-	_, err = cf.EachOrg().Parallel(printOrgName)()
+	_, err = cf.Each(functions.OrgFunc).Parallel(printName)()
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	//Print Each Space Name
 	fmt.Println("Print Each Space Names:")
-	var printSpaceName functions.SpaceAction
-	printSpaceName = func(space functions.Space) error {
-		fmt.Println(space.SPACE.Name)
-		return nil
-	}
-	_, err = cf.EachSpace().Action(printSpaceName)()
+	_, err = cf.Each(functions.SpaceFunc).Action(printName)()
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	//Filter Space based on Name - Only Print if Space name is 'system'
 	fmt.Println("Only Print System Space Name:")
-	var onlySystem functions.SpaceFilter
-	onlySystem = func(space functions.Space) bool {
-		if space.SPACE.Name == "system" {
+	var onlySystem functions.Filter
+	onlySystem = func(o functions.CFObject) bool {
+		if o.GetName() == "system" {
 			return true
 		}
 		return false
 	}
-	_, err = cf.EachSpace().Filter(onlySystem).Action(printSpaceName)()
+	_, err = cf.Each(functions.SpaceFunc).Filter(onlySystem).Action(printName)()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -83,18 +78,18 @@ func main() {
 		return
 	}
 
-	var createOrg functions.OrgAction = func(org functions.Org) error {
-		_, err = client2.GetOrgByName(org.ORG.Name)
+	var createOrg functions.Action = func(o functions.CFObject) error {
+		_, err = client2.GetOrgByName(o.GetName())
 		if err != nil {
-			_, err = client2.CreateOrg(cfclient.OrgRequest{Name: org.ORG.Name})
+			_, err = client2.CreateOrg(cfclient.OrgRequest{Name: o.GetName()})
 			fmt.Println(err)
 		} else {
-			err = fmt.Errorf("Org already exists: %s", org.ORG.Name)
+			err = fmt.Errorf("Org already exists: %s", o.GetName())
 		}
 		return err
 	}
 
-	_, err = cf.EachOrg().Parallel(createOrg)()
+	_, err = cf.Each(functions.OrgFunc).Parallel(createOrg)()
 	if err != nil {
 		fmt.Println(err)
 	}
