@@ -11,7 +11,7 @@ func main() {
 	config := &cfclient.Config{
 		ApiAddress:        "https://api.pas.nsx-t.shaozhenpcf.com",
 		Username:          "admin",
-		Password:          "hc9TO6_KThKb3WVhrX68B1uIusyLLvQM",
+		Password:          "XXXX",
 		SkipSslValidation: true,
 	}
 	client, err := cfclient.NewClient(config)
@@ -69,7 +69,7 @@ func main() {
 	config2 := &cfclient.Config{
 		ApiAddress:        "https://api.pks.nsx.shaozhenpcf.com",
 		Username:          "admin",
-		Password:          "Vu056X1ePqy1q-v19rfTUS9YJLkdJeWd",
+		Password:          "xxxxx",
 		SkipSslValidation: true,
 	}
 	client2, err := cfclient.NewClient(config2)
